@@ -266,20 +266,25 @@ impl<B: MysqlShim<W>, R: Read, W: Write> MysqlIntermediary<B, R, W> {
                         io::ErrorKind::UnexpectedEof,
                         "client sent incomplete handshake",
                     ),
-                    nom::Err::Failure((input, nom_e_kind))
-                    | nom::Err::Error((input, nom_e_kind)) => {
-                        if let nom::error::ErrorKind::Eof = nom_e_kind {
-                            io::Error::new(
-                                io::ErrorKind::UnexpectedEof,
-                                format!("client did not complete handshake; got {:?}", input),
-                            )
-                        } else {
-                            io::Error::new(
-                                io::ErrorKind::InvalidData,
-                                format!("bad client handshake; got {:?} ({:?})", input, nom_e_kind),
-                            )
-                        }
-                    }
+                    // nom::Err::Failure((input, nom_e_kind))
+                    // | nom::Err::Error((input, nom_e_kind)) => {
+                    //     if let nom::error::ErrorKind::Eof = nom_e_kind {
+                    //         io::Error::new(
+                    //             io::ErrorKind::UnexpectedEof,
+                    //             format!("client did not complete handshake; got {:?}", input),
+                    //         )
+                    //     } else {
+                    //         io::Error::new(
+                    //             io::ErrorKind::InvalidData,
+                    //             format!("bad client handshake; got {:?} ({:?})", input, nom_e_kind),
+                    //         )
+                    //     }
+                    // }
+                    nom::Err::Failure(_)
+                        | nom::Err::Error(_) => io::Error::new(
+                            io::ErrorKind::UnexpectedEof,
+                            "client sent incomplete handshake",
+                        )
                 })?
                 .1;
             self.writer.set_seq(seq + 1);
